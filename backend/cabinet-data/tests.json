@@ -1,0 +1,16 @@
+{
+  "tests": [
+    {
+      "name": "Get all plots",
+      "method": "GET",
+      "path": "/?all=1",
+      "expectedStatus": 200
+    },
+    {
+      "name": "Get plot data",
+      "method": "GET",
+      "path": "/?plot=1",
+      "expectedStatus": 200
+    }
+  ]
+}

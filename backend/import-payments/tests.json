@@ -1,0 +1,13 @@
+{
+  "tests": [
+    {
+      "name": "Import without file",
+      "method": "POST",
+      "path": "/",
+      "body": {},
+      "expectedStatus": 400,
+      "expectedBody": {"error": "Файл не передан"},
+      "bodyMatcher": "partial"
+    }
+  ]
+}
