@@ -12,48 +12,53 @@ interface Notification {
   read: boolean;
 }
 
-interface Payment {
-  id: number;
-  title: string;
-  amount: string;
-  date: string;
-  status: "paid" | "pending" | "overdue";
-}
-
 const NOTIFICATIONS: Notification[] = [
   { id: 1, type: "charge", title: "Новое начисление: членские взносы", amount: "4 850 ₽", date: "08 апр 2026", read: false },
   { id: 2, type: "payment", title: "Платёж принят: электроэнергия", amount: "1 230 ₽", date: "05 апр 2026", read: false },
   { id: 3, type: "payment", title: "Платёж принят: членские взносы", amount: "4 850 ₽", date: "28 мар 2026", read: true },
 ];
 
-const PAYMENTS: Payment[] = [
-  { id: 1, title: "Членские взносы", amount: "4 850 ₽", date: "08 апр 2026", status: "pending" },
-  { id: 2, title: "Электроэнергия", amount: "1 230 ₽", date: "05 апр 2026", status: "paid" },
-  { id: 3, title: "Членские взносы", amount: "4 850 ₽", date: "28 мар 2026", status: "paid" },
-];
-
 interface Charge {
   id: number;
   period: string;
   amount: string;
+  amountNum: number;
   dueDate: string;
   status: "paid" | "pending" | "overdue";
 }
 
+interface Payment {
+  id: number;
+  title: string;
+  amount: string;
+  amountNum: number;
+  date: string;
+  status: "paid" | "pending" | "overdue";
+}
+
 const CHARGES_MEMBERSHIP: Charge[] = [
-  { id: 1,  period: "Май 2025", amount: "4 850 ₽", dueDate: "20 май 2025", status: "paid" },
-  { id: 2,  period: "Май 2024", amount: "4 850 ₽", dueDate: "20 май 2024", status: "paid" },
-  { id: 3,  period: "Май 2023", amount: "4 850 ₽", dueDate: "20 май 2023", status: "paid" },
-  { id: 4,  period: "Май 2022", amount: "4 850 ₽", dueDate: "20 май 2022", status: "paid" },
-  { id: 5,  period: "Май 2021", amount: "4 850 ₽", dueDate: "20 май 2021", status: "paid" },
-  { id: 6,  period: "Май 2020", amount: "4 850 ₽", dueDate: "20 май 2020", status: "paid" },
+  { id: 1, period: "Май 2025", amount: "4 850 ₽", amountNum: 4850, dueDate: "20 май 2025", status: "paid" },
+  { id: 2, period: "Май 2024", amount: "4 850 ₽", amountNum: 4850, dueDate: "20 май 2024", status: "paid" },
+  { id: 3, period: "Май 2023", amount: "4 850 ₽", amountNum: 4850, dueDate: "20 май 2023", status: "paid" },
+  { id: 4, period: "Май 2022", amount: "4 850 ₽", amountNum: 4850, dueDate: "20 май 2022", status: "paid" },
+  { id: 5, period: "Май 2021", amount: "4 850 ₽", amountNum: 4850, dueDate: "20 май 2021", status: "paid" },
+  { id: 6, period: "Май 2020", amount: "4 850 ₽", amountNum: 4850, dueDate: "20 май 2020", status: "paid" },
 ];
 
 const CHARGES_ELECTRICITY: Charge[] = [
-  { id: 1, period: "Апрель 2026", amount: "1 340 ₽", dueDate: "25 апр 2026", status: "pending" },
-  { id: 2, period: "Март 2026", amount: "1 230 ₽", dueDate: "25 мар 2026", status: "paid" },
-  { id: 3, period: "Февраль 2026", amount: "1 410 ₽", dueDate: "25 фев 2026", status: "overdue" },
-  { id: 4, period: "Январь 2026", amount: "1 580 ₽", dueDate: "25 янв 2026", status: "paid" },
+  { id: 1, period: "Апрель 2026", amount: "1 340 ₽", amountNum: 1340, dueDate: "25 апр 2026", status: "pending" },
+  { id: 2, period: "Март 2026", amount: "1 230 ₽", amountNum: 1230, dueDate: "25 мар 2026", status: "paid" },
+  { id: 3, period: "Февраль 2026", amount: "1 410 ₽", amountNum: 1410, dueDate: "25 фев 2026", status: "overdue" },
+  { id: 4, period: "Январь 2026", amount: "1 580 ₽", amountNum: 1580, dueDate: "25 янв 2026", status: "paid" },
+];
+
+const PAYMENTS_MEMBERSHIP: Payment[] = [
+  { id: 1, title: "Членские взносы", amount: "4 850 ₽", amountNum: 4850, date: "08 апр 2026", status: "pending" },
+  { id: 2, title: "Членские взносы", amount: "4 850 ₽", amountNum: 4850, date: "28 мар 2026", status: "paid" },
+];
+
+const PAYMENTS_ELECTRICITY: Payment[] = [
+  { id: 1, title: "Электроэнергия", amount: "1 230 ₽", amountNum: 1230, date: "05 апр 2026", status: "paid" },
 ];
 
 export default function Index() {
@@ -65,7 +70,7 @@ export default function Index() {
   const [notifPhone, setNotifPhone] = useState("+7 (900) 123-45-67");
   const [settingsSaved, setSettingsSaved] = useState(false);
   const [activeTab, setActiveTab] = useState<"membership" | "electricity" | "notifications" | "settings">("membership");
-  const [membershipSubTab, setMembershipSubTab] = useState<"charges" | "payments">("charges");
+  const [membershipSubTab, setMembershipSubTab] = useState<"charges" | "payments" | "balance">("charges");
   const [electricitySubTab, setElectricitySubTab] = useState<"charges" | "payments">("charges");
 
   const unreadCount = notifications.filter((n) => !n.read).length;
@@ -248,84 +253,123 @@ export default function Index() {
           </div>
 
           {/* MEMBERSHIP TAB */}
-          {activeTab === "membership" && (
-            <div className="animate-slide-up">
-              <div className="flex gap-2 mb-5 bg-secondary rounded-xl p-1 w-fit">
-                <button
-                  onClick={() => setMembershipSubTab("charges")}
-                  className={`px-5 py-2 rounded-lg text-base font-medium transition-colors ${
-                    membershipSubTab === "charges"
-                      ? "bg-white text-foreground shadow-sm"
-                      : "text-muted-foreground hover:text-foreground"
-                  }`}
-                >
-                  Начисления
-                </button>
-                <button
-                  onClick={() => setMembershipSubTab("payments")}
-                  className={`px-5 py-2 rounded-lg text-base font-medium transition-colors ${
-                    membershipSubTab === "payments"
-                      ? "bg-white text-foreground shadow-sm"
-                      : "text-muted-foreground hover:text-foreground"
-                  }`}
-                >
-                  Оплаты
-                </button>
+          {activeTab === "membership" && (() => {
+            const totalCharged = CHARGES_MEMBERSHIP.reduce((s, c) => s + c.amountNum, 0);
+            const totalPaid = PAYMENTS_MEMBERSHIP.filter((p) => p.status === "paid").reduce((s, p) => s + p.amountNum, 0);
+            const diff = totalPaid - totalCharged;
+            return (
+              <div className="animate-slide-up">
+                <div className="flex gap-2 mb-5 bg-secondary rounded-xl p-1 w-fit">
+                  <button
+                    onClick={() => setMembershipSubTab("charges")}
+                    className={`px-5 py-2 rounded-lg text-base font-medium transition-colors ${
+                      membershipSubTab === "charges" ? "bg-white text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
+                    }`}
+                  >
+                    Начисления
+                  </button>
+                  <button
+                    onClick={() => setMembershipSubTab("payments")}
+                    className={`px-5 py-2 rounded-lg text-base font-medium transition-colors ${
+                      membershipSubTab === "payments" ? "bg-white text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
+                    }`}
+                  >
+                    Оплаты
+                  </button>
+                  <button
+                    onClick={() => setMembershipSubTab("balance")}
+                    className={`px-5 py-2 rounded-lg text-base font-medium transition-colors ${
+                      membershipSubTab === "balance" ? "bg-white text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
+                    }`}
+                  >
+                    Долг / Переплата
+                  </button>
+                </div>
+
+                {membershipSubTab === "charges" && (
+                  <div className="bg-white rounded-2xl border border-border overflow-hidden">
+                    <div className="px-6 py-4 border-b border-border flex items-center gap-3">
+                      <div className="w-9 h-9 rounded-xl bg-accent flex items-center justify-center">
+                        <Icon name="FileText" size={18} className="text-primary" />
+                      </div>
+                      <h3 className="text-lg font-semibold text-foreground">Начисления — Членские взносы</h3>
+                    </div>
+                    <div className="divide-y divide-border">
+                      {CHARGES_MEMBERSHIP.map((c) => (
+                        <div key={c.id} className="px-6 py-4 flex items-center justify-between gap-4">
+                          <div>
+                            <p className="font-medium text-foreground text-base">{c.period}</p>
+                            <p className="text-muted-foreground text-sm">Срок оплаты: {c.dueDate}</p>
+                          </div>
+                          <div className="flex items-center gap-3 flex-shrink-0">
+                            <span className="font-semibold text-foreground text-lg">{c.amount}</span>
+                            <span className={`text-sm font-medium px-3 py-1 rounded-lg border ${statusLabel[c.status].color}`}>
+                              {statusLabel[c.status].label}
+                            </span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {membershipSubTab === "payments" && (
+                  <div className="bg-white rounded-2xl border border-border overflow-hidden">
+                    <div className="px-6 py-4 border-b border-border flex items-center gap-3">
+                      <div className="w-9 h-9 rounded-xl bg-accent flex items-center justify-center">
+                        <Icon name="CreditCard" size={18} className="text-primary" />
+                      </div>
+                      <h3 className="text-lg font-semibold text-foreground">Оплаты — Членские взносы</h3>
+                    </div>
+                    <div className="divide-y divide-border">
+                      {PAYMENTS_MEMBERSHIP.map((p) => (
+                        <div key={p.id} className="px-6 py-4 flex items-center justify-between gap-4">
+                          <div>
+                            <p className="font-medium text-foreground text-base">{p.title}</p>
+                            <p className="text-muted-foreground text-sm">{p.date}</p>
+                          </div>
+                          <div className="flex items-center gap-3 flex-shrink-0">
+                            <span className="font-semibold text-foreground text-lg">{p.amount}</span>
+                            <span className={`text-sm font-medium px-3 py-1 rounded-lg border ${statusLabel[p.status].color}`}>
+                              {statusLabel[p.status].label}
+                            </span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {membershipSubTab === "balance" && (
+                  <div className="bg-white rounded-2xl border border-border p-8">
+                    <div className="grid sm:grid-cols-2 gap-4 mb-8">
+                      <div className="bg-secondary rounded-xl p-5">
+                        <p className="text-muted-foreground text-sm mb-1">Всего начислено</p>
+                        <p className="text-2xl font-bold text-foreground">{totalCharged.toLocaleString("ru-RU")} ₽</p>
+                      </div>
+                      <div className="bg-secondary rounded-xl p-5">
+                        <p className="text-muted-foreground text-sm mb-1">Всего оплачено</p>
+                        <p className="text-2xl font-bold text-foreground">{totalPaid.toLocaleString("ru-RU")} ₽</p>
+                      </div>
+                    </div>
+                    <div className={`rounded-2xl border p-8 flex items-center gap-6 ${diff < 0 ? "bg-red-50 border-red-200" : "bg-green-50 border-green-200"}`}>
+                      <div className={`w-16 h-16 rounded-2xl flex items-center justify-center flex-shrink-0 ${diff < 0 ? "bg-red-100" : "bg-green-100"}`}>
+                        <Icon name={diff < 0 ? "AlertCircle" : "CheckCircle"} size={28} className={diff < 0 ? "text-red-600" : "text-green-600"} />
+                      </div>
+                      <div>
+                        <p className={`text-lg font-semibold mb-1 ${diff < 0 ? "text-red-700" : "text-green-700"}`}>
+                          {diff < 0 ? "Долг" : "Переплата"}
+                        </p>
+                        <p className={`text-4xl font-bold ${diff < 0 ? "text-red-600" : "text-green-600"}`}>
+                          {Math.abs(diff).toLocaleString("ru-RU")} ₽
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
-              {membershipSubTab === "charges" && (
-                <div className="bg-white rounded-2xl border border-border overflow-hidden">
-                  <div className="px-6 py-4 border-b border-border flex items-center gap-3">
-                    <div className="w-9 h-9 rounded-xl bg-accent flex items-center justify-center">
-                      <Icon name="FileText" size={18} className="text-primary" />
-                    </div>
-                    <h3 className="text-lg font-semibold text-foreground">Начисления — Членские взносы</h3>
-                  </div>
-                  <div className="divide-y divide-border">
-                    {CHARGES_MEMBERSHIP.map((c) => (
-                      <div key={c.id} className="px-6 py-4 flex items-center justify-between gap-4">
-                        <div>
-                          <p className="font-medium text-foreground text-base">{c.period}</p>
-                          <p className="text-muted-foreground text-sm">Срок оплаты: {c.dueDate}</p>
-                        </div>
-                        <div className="flex items-center gap-3 flex-shrink-0">
-                          <span className="font-semibold text-foreground text-lg">{c.amount}</span>
-                          <span className={`text-sm font-medium px-3 py-1 rounded-lg border ${statusLabel[c.status].color}`}>
-                            {statusLabel[c.status].label}
-                          </span>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-              {membershipSubTab === "payments" && (
-                <div className="bg-white rounded-2xl border border-border overflow-hidden">
-                  <div className="px-6 py-4 border-b border-border flex items-center gap-3">
-                    <div className="w-9 h-9 rounded-xl bg-accent flex items-center justify-center">
-                      <Icon name="CreditCard" size={18} className="text-primary" />
-                    </div>
-                    <h3 className="text-lg font-semibold text-foreground">Оплаты — Членские взносы</h3>
-                  </div>
-                  <div className="divide-y divide-border">
-                    {PAYMENTS.filter((p) => p.title === "Членские взносы").map((p) => (
-                      <div key={p.id} className="px-6 py-4 flex items-center justify-between gap-4">
-                        <div>
-                          <p className="font-medium text-foreground text-base">{p.title}</p>
-                          <p className="text-muted-foreground text-sm">{p.date}</p>
-                        </div>
-                        <div className="flex items-center gap-3 flex-shrink-0">
-                          <span className="font-semibold text-foreground text-lg">{p.amount}</span>
-                          <span className={`text-sm font-medium px-3 py-1 rounded-lg border ${statusLabel[p.status].color}`}>
-                            {statusLabel[p.status].label}
-                          </span>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
-          )}
+            );
+          })()}
 
           {/* ELECTRICITY TAB */}
           {activeTab === "electricity" && (
@@ -387,7 +431,7 @@ export default function Index() {
                     <h3 className="text-lg font-semibold text-foreground">Оплаты — Электроэнергия</h3>
                   </div>
                   <div className="divide-y divide-border">
-                    {PAYMENTS.filter((p) => p.title === "Электроэнергия").map((p) => (
+                    {PAYMENTS_ELECTRICITY.map((p) => (
                       <div key={p.id} className="px-6 py-4 flex items-center justify-between gap-4">
                         <div>
                           <p className="font-medium text-foreground text-base">{p.title}</p>
