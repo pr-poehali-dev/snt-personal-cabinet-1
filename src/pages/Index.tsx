@@ -1,7 +1,7 @@
 import { useState } from "react";
 import Icon from "@/components/ui/icon";
 
-type Page = "home" | "cabinet" | "charges";
+type Page = "home" | "cabinet";
 
 interface Notification {
   id: number;
@@ -62,7 +62,7 @@ export default function Index() {
   const [notifEmailAddr, setNotifEmailAddr] = useState("ivan@example.com");
   const [notifPhone, setNotifPhone] = useState("+7 (900) 123-45-67");
   const [settingsSaved, setSettingsSaved] = useState(false);
-  const [activeTab, setActiveTab] = useState<"payments" | "notifications" | "settings">("payments");
+  const [activeTab, setActiveTab] = useState<"charges" | "payments" | "notifications" | "settings">("charges");
   const [chargesTab, setChargesTab] = useState<"membership" | "electricity">("membership");
 
   const unreadCount = notifications.filter((n) => !n.read).length;
@@ -104,16 +104,6 @@ export default function Index() {
               }`}
             >
               Главная
-            </button>
-            <button
-              onClick={() => setPage("charges")}
-              className={`px-4 py-2 rounded-lg text-base font-medium transition-colors ${
-                page === "charges"
-                  ? "bg-accent text-accent-foreground"
-                  : "text-muted-foreground hover:text-foreground hover:bg-secondary"
-              }`}
-            >
-              Начисления
             </button>
             <button
               onClick={() => setPage("cabinet")}
@@ -204,76 +194,6 @@ export default function Index() {
         </main>
       )}
 
-      {/* CHARGES PAGE */}
-      {page === "charges" && (
-        <main className="max-w-4xl mx-auto px-4 sm:px-6 py-8 animate-fade-in">
-          <div className="mb-6">
-            <h2 className="text-3xl font-bold text-foreground mb-1">Начисления</h2>
-            <p className="text-muted-foreground text-base">История начислений по категориям</p>
-          </div>
-
-          {/* Sub-tabs */}
-          <div className="flex gap-2 mb-6 bg-secondary rounded-xl p-1 w-fit">
-            <button
-              onClick={() => setChargesTab("membership")}
-              className={`px-6 py-2.5 rounded-lg text-base font-medium transition-colors ${
-                chargesTab === "membership"
-                  ? "bg-white text-foreground shadow-sm"
-                  : "text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              Членские взносы
-            </button>
-            <button
-              onClick={() => setChargesTab("electricity")}
-              className={`px-6 py-2.5 rounded-lg text-base font-medium transition-colors ${
-                chargesTab === "electricity"
-                  ? "bg-white text-foreground shadow-sm"
-                  : "text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              Электроэнергия
-            </button>
-          </div>
-
-          {/* Charges list */}
-          {(() => {
-            const charges = chargesTab === "membership" ? CHARGES_MEMBERSHIP : CHARGES_ELECTRICITY;
-            const icon = chargesTab === "membership" ? "Users" : "Zap";
-            return (
-              <div className="animate-slide-up">
-                <div className="bg-white rounded-2xl border border-border overflow-hidden">
-                  <div className="px-6 py-4 border-b border-border flex items-center gap-3">
-                    <div className="w-9 h-9 rounded-xl bg-accent flex items-center justify-center">
-                      <Icon name={icon} size={18} className="text-primary" />
-                    </div>
-                    <h3 className="text-lg font-semibold text-foreground">
-                      {chargesTab === "membership" ? "Членские взносы" : "Электроэнергия"}
-                    </h3>
-                  </div>
-                  <div className="divide-y divide-border">
-                    {charges.map((c) => (
-                      <div key={c.id} className="px-6 py-4 flex items-center justify-between gap-4">
-                        <div>
-                          <p className="font-medium text-foreground text-base">{c.period}</p>
-                          <p className="text-muted-foreground text-sm">Срок оплаты: {c.dueDate}</p>
-                        </div>
-                        <div className="flex items-center gap-3 flex-shrink-0">
-                          <span className="font-semibold text-foreground text-lg">{c.amount}</span>
-                          <span className={`text-sm font-medium px-3 py-1 rounded-lg border ${statusLabel[c.status].color}`}>
-                            {statusLabel[c.status].label}
-                          </span>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            );
-          })()}
-        </main>
-      )}
-
       {/* CABINET PAGE */}
       {page === "cabinet" && (
         <main className="max-w-4xl mx-auto px-4 sm:px-6 py-8 animate-fade-in">
@@ -298,6 +218,7 @@ export default function Index() {
           <div className="flex gap-2 mb-6 bg-secondary rounded-xl p-1">
             {(
               [
+                { key: "charges", label: "Начисления", icon: "FileText" },
                 { key: "payments", label: "Платежи", icon: "CreditCard" },
                 { key: "notifications", label: "Уведомления", icon: "Bell" },
                 { key: "settings", label: "Настройки", icon: "Settings" },
@@ -322,6 +243,66 @@ export default function Index() {
               </button>
             ))}
           </div>
+
+          {/* CHARGES TAB */}
+          {activeTab === "charges" && (
+            <div className="animate-slide-up">
+              <div className="flex gap-2 mb-5 bg-secondary rounded-xl p-1 w-fit">
+                <button
+                  onClick={() => setChargesTab("membership")}
+                  className={`px-5 py-2 rounded-lg text-base font-medium transition-colors ${
+                    chargesTab === "membership"
+                      ? "bg-white text-foreground shadow-sm"
+                      : "text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  Членские взносы
+                </button>
+                <button
+                  onClick={() => setChargesTab("electricity")}
+                  className={`px-5 py-2 rounded-lg text-base font-medium transition-colors ${
+                    chargesTab === "electricity"
+                      ? "bg-white text-foreground shadow-sm"
+                      : "text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  Электроэнергия
+                </button>
+              </div>
+              {(() => {
+                const charges = chargesTab === "membership" ? CHARGES_MEMBERSHIP : CHARGES_ELECTRICITY;
+                const icon = chargesTab === "membership" ? "Users" : "Zap";
+                return (
+                  <div className="bg-white rounded-2xl border border-border overflow-hidden">
+                    <div className="px-6 py-4 border-b border-border flex items-center gap-3">
+                      <div className="w-9 h-9 rounded-xl bg-accent flex items-center justify-center">
+                        <Icon name={icon} size={18} className="text-primary" />
+                      </div>
+                      <h3 className="text-lg font-semibold text-foreground">
+                        {chargesTab === "membership" ? "Членские взносы" : "Электроэнергия"}
+                      </h3>
+                    </div>
+                    <div className="divide-y divide-border">
+                      {charges.map((c) => (
+                        <div key={c.id} className="px-6 py-4 flex items-center justify-between gap-4">
+                          <div>
+                            <p className="font-medium text-foreground text-base">{c.period}</p>
+                            <p className="text-muted-foreground text-sm">Срок оплаты: {c.dueDate}</p>
+                          </div>
+                          <div className="flex items-center gap-3 flex-shrink-0">
+                            <span className="font-semibold text-foreground text-lg">{c.amount}</span>
+                            <span className={`text-sm font-medium px-3 py-1 rounded-lg border ${statusLabel[c.status].color}`}>
+                              {statusLabel[c.status].label}
+                            </span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                );
+              })()}
+            </div>
+          )}
 
           {/* PAYMENTS TAB */}
           {activeTab === "payments" && (
