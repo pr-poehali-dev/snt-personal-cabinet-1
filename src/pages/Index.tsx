@@ -21,18 +21,18 @@ interface Payment {
 }
 
 const NOTIFICATIONS: Notification[] = [
-  { id: 1, type: "charge", title: "Новое начисление: квартплата", amount: "4 850 ₽", date: "08 апр 2026", read: false },
+  { id: 1, type: "charge", title: "Новое начисление: членские взносы", amount: "4 850 ₽", date: "08 апр 2026", read: false },
   { id: 2, type: "payment", title: "Платёж принят: электроэнергия", amount: "1 230 ₽", date: "05 апр 2026", read: false },
   { id: 3, type: "charge", title: "Новое начисление: газ", amount: "720 ₽", date: "01 апр 2026", read: true },
-  { id: 4, type: "payment", title: "Платёж принят: квартплата", amount: "4 850 ₽", date: "28 мар 2026", read: true },
+  { id: 4, type: "payment", title: "Платёж принят: членские взносы", amount: "4 850 ₽", date: "28 мар 2026", read: true },
 ];
 
 const PAYMENTS: Payment[] = [
-  { id: 1, title: "Квартплата", amount: "4 850 ₽", date: "08 апр 2026", status: "pending" },
+  { id: 1, title: "Членские взносы", amount: "4 850 ₽", date: "08 апр 2026", status: "pending" },
   { id: 2, title: "Электроэнергия", amount: "1 230 ₽", date: "05 апр 2026", status: "paid" },
   { id: 3, title: "Газоснабжение", amount: "720 ₽", date: "01 апр 2026", status: "paid" },
   { id: 4, title: "Интернет", amount: "600 ₽", date: "28 мар 2026", status: "overdue" },
-  { id: 5, title: "Квартплата", amount: "4 850 ₽", date: "28 мар 2026", status: "paid" },
+  { id: 5, title: "Членские взносы", amount: "4 850 ₽", date: "28 мар 2026", status: "paid" },
 ];
 
 export default function Index() {
