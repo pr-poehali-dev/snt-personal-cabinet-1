@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
+import * as XLSX from "xlsx";
 import Icon from "@/components/ui/icon";
 
 type Page = "home" | "cabinet";
@@ -72,6 +73,11 @@ export default function Index() {
   const [activeTab, setActiveTab] = useState<"membership" | "electricity" | "notifications" | "settings">("membership");
   const [membershipSubTab, setMembershipSubTab] = useState<"charges" | "payments" | "balance">("charges");
   const [electricitySubTab, setElectricitySubTab] = useState<"charges" | "payments" | "balance">("charges");
+  const [paymentsMembership, setPaymentsMembership] = useState<Payment[]>(PAYMENTS_MEMBERSHIP);
+  const [paymentsElectricity, setPaymentsElectricity] = useState<Payment[]>(PAYMENTS_ELECTRICITY);
+  const [importStatus, setImportStatus] = useState<"idle" | "success" | "error">("idle");
+  const [importMessage, setImportMessage] = useState("");
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const unreadCount = notifications.filter((n) => !n.read).length;
 
@@ -82,6 +88,74 @@ export default function Index() {
   function saveSettings() {
     setSettingsSaved(true);
     setTimeout(() => setSettingsSaved(false), 2500);
+  }
+
+  function handleImport(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!fileInputRef.current) return;
+    fileInputRef.current.value = "";
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      try {
+        const data = new Uint8Array(ev.target?.result as ArrayBuffer);
+        const workbook = XLSX.read(data, { type: "array", cellDates: true });
+        const sheet = workbook.Sheets[workbook.SheetNames[0]];
+        const rows: Record<string, unknown>[] = XLSX.utils.sheet_to_json(sheet, { defval: "" });
+
+        const newMembership: Payment[] = [];
+        const newElectricity: Payment[] = [];
+        let count = 0;
+
+        rows.forEach((row, i) => {
+          const keys = Object.keys(row).map((k) => k.toLowerCase().trim());
+          const getVal = (names: string[]) => {
+            const key = Object.keys(row).find((k) => names.includes(k.toLowerCase().trim()));
+            return key ? String(row[key]).trim() : "";
+          };
+
+          const dateRaw = getVal(["дата", "date"]);
+          const amountRaw = getVal(["сумма", "amount", "сумма оплаты"]);
+          const service = getVal(["услуга", "service", "категория", "category"]).toLowerCase();
+
+          const amountNum = parseFloat(String(amountRaw).replace(/[^\d.,]/g, "").replace(",", "."));
+          if (!dateRaw || isNaN(amountNum)) return;
+
+          const payment: Payment = {
+            id: Date.now() + i,
+            title: service.includes("электро") ? "Электроэнергия" : "Членские взносы",
+            amount: `${amountNum.toLocaleString("ru-RU")} ₽`,
+            amountNum,
+            date: dateRaw,
+            status: "paid",
+          };
+
+          if (service.includes("электро")) {
+            newElectricity.push(payment);
+          } else {
+            newMembership.push(payment);
+          }
+          count++;
+        });
+
+        if (count === 0) {
+          setImportStatus("error");
+          setImportMessage("Не удалось распознать данные. Проверьте колонки: дата, сумма, участок, услуга.");
+        } else {
+          setPaymentsMembership((prev) => [...newMembership, ...prev]);
+          setPaymentsElectricity((prev) => [...newElectricity, ...prev]);
+          setImportStatus("success");
+          setImportMessage(`Импортировано записей: ${count} (членские взносы: ${newMembership.length}, электроэнергия: ${newElectricity.length})`);
+        }
+        setTimeout(() => setImportStatus("idle"), 4000);
+      } catch {
+        setImportStatus("error");
+        setImportMessage("Ошибка чтения файла. Убедитесь, что это файл Excel (.xlsx).");
+        setTimeout(() => setImportStatus("idle"), 4000);
+      }
+    };
+    reader.readAsArrayBuffer(file);
   }
 
   const statusLabel = {
@@ -206,7 +280,7 @@ export default function Index() {
       {page === "cabinet" && (
         <main className="max-w-4xl mx-auto px-4 sm:px-6 py-8 animate-fade-in">
           {/* User card */}
-          <div className="bg-white rounded-2xl border border-border p-6 mb-6 flex flex-col sm:flex-row items-start sm:items-center gap-5">
+          <div className="bg-white rounded-2xl border border-border p-6 mb-4 flex flex-col sm:flex-row items-start sm:items-center gap-5">
             <div className="w-16 h-16 rounded-2xl bg-accent flex items-center justify-center flex-shrink-0">
               <Icon name="User" size={28} className="text-primary" />
             </div>
@@ -214,13 +288,33 @@ export default function Index() {
               <h2 className="text-2xl font-bold text-foreground">Иванов Иван Иванович</h2>
               <p className="text-muted-foreground text-base mt-0.5">Лицевой счёт: 123 456 789 · Кв. 47, ул. Ленина, 12</p>
             </div>
-            {unreadCount > 0 && (
-              <div className="bg-red-50 border border-red-200 rounded-xl px-4 py-2 flex items-center gap-2">
-                <Icon name="Bell" size={18} className="text-red-600" />
-                <span className="text-red-700 font-semibold text-base">{unreadCount} новых</span>
-              </div>
-            )}
+            <div className="flex items-center gap-3 flex-shrink-0">
+              {unreadCount > 0 && (
+                <div className="bg-red-50 border border-red-200 rounded-xl px-4 py-2 flex items-center gap-2">
+                  <Icon name="Bell" size={18} className="text-red-600" />
+                  <span className="text-red-700 font-semibold text-base">{unreadCount} новых</span>
+                </div>
+              )}
+              <input ref={fileInputRef} type="file" accept=".xlsx" className="hidden" onChange={handleImport} />
+              <button
+                onClick={() => fileInputRef.current?.click()}
+                className="flex items-center gap-2 bg-primary text-primary-foreground px-4 py-2 rounded-xl text-base font-medium hover:bg-primary/90 transition-colors"
+              >
+                <Icon name="Upload" size={18} />
+                Импорт оплат
+              </button>
+            </div>
           </div>
+
+          {/* Import status */}
+          {importStatus !== "idle" && (
+            <div className={`mb-4 px-5 py-3 rounded-xl flex items-center gap-3 text-base font-medium ${
+              importStatus === "success" ? "bg-green-50 border border-green-200 text-green-800" : "bg-red-50 border border-red-200 text-red-800"
+            }`}>
+              <Icon name={importStatus === "success" ? "CheckCircle" : "AlertCircle"} size={18} />
+              {importMessage}
+            </div>
+          )}
 
           {/* Tabs */}
           <div className="flex gap-2 mb-6 bg-secondary rounded-xl p-1">
@@ -255,7 +349,7 @@ export default function Index() {
           {/* MEMBERSHIP TAB */}
           {activeTab === "membership" && (() => {
             const totalCharged = CHARGES_MEMBERSHIP.reduce((s, c) => s + c.amountNum, 0);
-            const totalPaid = PAYMENTS_MEMBERSHIP.filter((p) => p.status === "paid").reduce((s, p) => s + p.amountNum, 0);
+            const totalPaid = paymentsMembership.filter((p) => p.status === "paid").reduce((s, p) => s + p.amountNum, 0);
             const diff = totalPaid - totalCharged;
             return (
               <div className="animate-slide-up">
@@ -322,7 +416,7 @@ export default function Index() {
                       <h3 className="text-lg font-semibold text-foreground">Оплаты — Членские взносы</h3>
                     </div>
                     <div className="divide-y divide-border">
-                      {PAYMENTS_MEMBERSHIP.map((p) => (
+                      {paymentsMembership.map((p) => (
                         <div key={p.id} className="px-6 py-4 flex items-center justify-between gap-4">
                           <div>
                             <p className="font-medium text-foreground text-base">{p.title}</p>
@@ -374,7 +468,7 @@ export default function Index() {
           {/* ELECTRICITY TAB */}
           {activeTab === "electricity" && (() => {
             const totalCharged = CHARGES_ELECTRICITY.reduce((s, c) => s + c.amountNum, 0);
-            const totalPaid = PAYMENTS_ELECTRICITY.filter((p) => p.status === "paid").reduce((s, p) => s + p.amountNum, 0);
+            const totalPaid = paymentsElectricity.filter((p) => p.status === "paid").reduce((s, p) => s + p.amountNum, 0);
             const diff = totalPaid - totalCharged;
             return (
               <div className="animate-slide-up">
@@ -441,7 +535,7 @@ export default function Index() {
                       <h3 className="text-lg font-semibold text-foreground">Оплаты — Электроэнергия</h3>
                     </div>
                     <div className="divide-y divide-border">
-                      {PAYMENTS_ELECTRICITY.map((p) => (
+                      {paymentsElectricity.map((p) => (
                         <div key={p.id} className="px-6 py-4 flex items-center justify-between gap-4">
                           <div>
                             <p className="font-medium text-foreground text-base">{p.title}</p>
