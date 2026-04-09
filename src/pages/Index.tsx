@@ -1,7 +1,7 @@
 import { useState } from "react";
 import Icon from "@/components/ui/icon";
 
-type Page = "home" | "cabinet";
+type Page = "home" | "cabinet" | "charges";
 
 interface Notification {
   id: number;
@@ -32,6 +32,28 @@ const PAYMENTS: Payment[] = [
   { id: 3, title: "Членские взносы", amount: "4 850 ₽", date: "28 мар 2026", status: "paid" },
 ];
 
+interface Charge {
+  id: number;
+  period: string;
+  amount: string;
+  dueDate: string;
+  status: "paid" | "pending" | "overdue";
+}
+
+const CHARGES_MEMBERSHIP: Charge[] = [
+  { id: 1, period: "Апрель 2026", amount: "4 850 ₽", dueDate: "20 апр 2026", status: "pending" },
+  { id: 2, period: "Март 2026", amount: "4 850 ₽", dueDate: "20 мар 2026", status: "paid" },
+  { id: 3, period: "Февраль 2026", amount: "4 850 ₽", dueDate: "20 фев 2026", status: "paid" },
+  { id: 4, period: "Январь 2026", amount: "4 850 ₽", dueDate: "20 янв 2026", status: "paid" },
+];
+
+const CHARGES_ELECTRICITY: Charge[] = [
+  { id: 1, period: "Апрель 2026", amount: "1 340 ₽", dueDate: "25 апр 2026", status: "pending" },
+  { id: 2, period: "Март 2026", amount: "1 230 ₽", dueDate: "25 мар 2026", status: "paid" },
+  { id: 3, period: "Февраль 2026", amount: "1 410 ₽", dueDate: "25 фев 2026", status: "overdue" },
+  { id: 4, period: "Январь 2026", amount: "1 580 ₽", dueDate: "25 янв 2026", status: "paid" },
+];
+
 export default function Index() {
   const [page, setPage] = useState<Page>("home");
   const [notifications, setNotifications] = useState(NOTIFICATIONS);
@@ -41,6 +63,7 @@ export default function Index() {
   const [notifPhone, setNotifPhone] = useState("+7 (900) 123-45-67");
   const [settingsSaved, setSettingsSaved] = useState(false);
   const [activeTab, setActiveTab] = useState<"payments" | "notifications" | "settings">("payments");
+  const [chargesTab, setChargesTab] = useState<"membership" | "electricity">("membership");
 
   const unreadCount = notifications.filter((n) => !n.read).length;
 
@@ -81,6 +104,16 @@ export default function Index() {
               }`}
             >
               Главная
+            </button>
+            <button
+              onClick={() => setPage("charges")}
+              className={`px-4 py-2 rounded-lg text-base font-medium transition-colors ${
+                page === "charges"
+                  ? "bg-accent text-accent-foreground"
+                  : "text-muted-foreground hover:text-foreground hover:bg-secondary"
+              }`}
+            >
+              Начисления
             </button>
             <button
               onClick={() => setPage("cabinet")}
@@ -168,6 +201,76 @@ export default function Index() {
               </p>
             </div>
           </div>
+        </main>
+      )}
+
+      {/* CHARGES PAGE */}
+      {page === "charges" && (
+        <main className="max-w-4xl mx-auto px-4 sm:px-6 py-8 animate-fade-in">
+          <div className="mb-6">
+            <h2 className="text-3xl font-bold text-foreground mb-1">Начисления</h2>
+            <p className="text-muted-foreground text-base">История начислений по категориям</p>
+          </div>
+
+          {/* Sub-tabs */}
+          <div className="flex gap-2 mb-6 bg-secondary rounded-xl p-1 w-fit">
+            <button
+              onClick={() => setChargesTab("membership")}
+              className={`px-6 py-2.5 rounded-lg text-base font-medium transition-colors ${
+                chargesTab === "membership"
+                  ? "bg-white text-foreground shadow-sm"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              Членские взносы
+            </button>
+            <button
+              onClick={() => setChargesTab("electricity")}
+              className={`px-6 py-2.5 rounded-lg text-base font-medium transition-colors ${
+                chargesTab === "electricity"
+                  ? "bg-white text-foreground shadow-sm"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              Электроэнергия
+            </button>
+          </div>
+
+          {/* Charges list */}
+          {(() => {
+            const charges = chargesTab === "membership" ? CHARGES_MEMBERSHIP : CHARGES_ELECTRICITY;
+            const icon = chargesTab === "membership" ? "Users" : "Zap";
+            return (
+              <div className="animate-slide-up">
+                <div className="bg-white rounded-2xl border border-border overflow-hidden">
+                  <div className="px-6 py-4 border-b border-border flex items-center gap-3">
+                    <div className="w-9 h-9 rounded-xl bg-accent flex items-center justify-center">
+                      <Icon name={icon} size={18} className="text-primary" />
+                    </div>
+                    <h3 className="text-lg font-semibold text-foreground">
+                      {chargesTab === "membership" ? "Членские взносы" : "Электроэнергия"}
+                    </h3>
+                  </div>
+                  <div className="divide-y divide-border">
+                    {charges.map((c) => (
+                      <div key={c.id} className="px-6 py-4 flex items-center justify-between gap-4">
+                        <div>
+                          <p className="font-medium text-foreground text-base">{c.period}</p>
+                          <p className="text-muted-foreground text-sm">Срок оплаты: {c.dueDate}</p>
+                        </div>
+                        <div className="flex items-center gap-3 flex-shrink-0">
+                          <span className="font-semibold text-foreground text-lg">{c.amount}</span>
+                          <span className={`text-sm font-medium px-3 py-1 rounded-lg border ${statusLabel[c.status].color}`}>
+                            {statusLabel[c.status].label}
+                          </span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            );
+          })()}
         </main>
       )}
 
