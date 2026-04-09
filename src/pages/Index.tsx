@@ -41,10 +41,12 @@ interface Charge {
 }
 
 const CHARGES_MEMBERSHIP: Charge[] = [
-  { id: 1, period: "Апрель 2026", amount: "4 850 ₽", dueDate: "20 апр 2026", status: "pending" },
-  { id: 2, period: "Март 2026", amount: "4 850 ₽", dueDate: "20 мар 2026", status: "paid" },
-  { id: 3, period: "Февраль 2026", amount: "4 850 ₽", dueDate: "20 фев 2026", status: "paid" },
-  { id: 4, period: "Январь 2026", amount: "4 850 ₽", dueDate: "20 янв 2026", status: "paid" },
+  { id: 1,  period: "Май 2025", amount: "4 850 ₽", dueDate: "20 май 2025", status: "paid" },
+  { id: 2,  period: "Май 2024", amount: "4 850 ₽", dueDate: "20 май 2024", status: "paid" },
+  { id: 3,  period: "Май 2023", amount: "4 850 ₽", dueDate: "20 май 2023", status: "paid" },
+  { id: 4,  period: "Май 2022", amount: "4 850 ₽", dueDate: "20 май 2022", status: "paid" },
+  { id: 5,  period: "Май 2021", amount: "4 850 ₽", dueDate: "20 май 2021", status: "paid" },
+  { id: 6,  period: "Май 2020", amount: "4 850 ₽", dueDate: "20 май 2020", status: "paid" },
 ];
 
 const CHARGES_ELECTRICITY: Charge[] = [
