@@ -71,7 +71,7 @@ export default function Index() {
   const [settingsSaved, setSettingsSaved] = useState(false);
   const [activeTab, setActiveTab] = useState<"membership" | "electricity" | "notifications" | "settings">("membership");
   const [membershipSubTab, setMembershipSubTab] = useState<"charges" | "payments" | "balance">("charges");
-  const [electricitySubTab, setElectricitySubTab] = useState<"charges" | "payments">("charges");
+  const [electricitySubTab, setElectricitySubTab] = useState<"charges" | "payments" | "balance">("charges");
 
   const unreadCount = notifications.filter((n) => !n.read).length;
 
@@ -372,84 +372,123 @@ export default function Index() {
           })()}
 
           {/* ELECTRICITY TAB */}
-          {activeTab === "electricity" && (
-            <div className="animate-slide-up">
-              <div className="flex gap-2 mb-5 bg-secondary rounded-xl p-1 w-fit">
-                <button
-                  onClick={() => setElectricitySubTab("charges")}
-                  className={`px-5 py-2 rounded-lg text-base font-medium transition-colors ${
-                    electricitySubTab === "charges"
-                      ? "bg-white text-foreground shadow-sm"
-                      : "text-muted-foreground hover:text-foreground"
-                  }`}
-                >
-                  Начисления
-                </button>
-                <button
-                  onClick={() => setElectricitySubTab("payments")}
-                  className={`px-5 py-2 rounded-lg text-base font-medium transition-colors ${
-                    electricitySubTab === "payments"
-                      ? "bg-white text-foreground shadow-sm"
-                      : "text-muted-foreground hover:text-foreground"
-                  }`}
-                >
-                  Оплаты
-                </button>
+          {activeTab === "electricity" && (() => {
+            const totalCharged = CHARGES_ELECTRICITY.reduce((s, c) => s + c.amountNum, 0);
+            const totalPaid = PAYMENTS_ELECTRICITY.filter((p) => p.status === "paid").reduce((s, p) => s + p.amountNum, 0);
+            const diff = totalPaid - totalCharged;
+            return (
+              <div className="animate-slide-up">
+                <div className="flex gap-2 mb-5 bg-secondary rounded-xl p-1 w-fit">
+                  <button
+                    onClick={() => setElectricitySubTab("charges")}
+                    className={`px-5 py-2 rounded-lg text-base font-medium transition-colors ${
+                      electricitySubTab === "charges" ? "bg-white text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
+                    }`}
+                  >
+                    Начисления
+                  </button>
+                  <button
+                    onClick={() => setElectricitySubTab("payments")}
+                    className={`px-5 py-2 rounded-lg text-base font-medium transition-colors ${
+                      electricitySubTab === "payments" ? "bg-white text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
+                    }`}
+                  >
+                    Оплаты
+                  </button>
+                  <button
+                    onClick={() => setElectricitySubTab("balance")}
+                    className={`px-5 py-2 rounded-lg text-base font-medium transition-colors ${
+                      electricitySubTab === "balance" ? "bg-white text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
+                    }`}
+                  >
+                    Долг / Переплата
+                  </button>
+                </div>
+
+                {electricitySubTab === "charges" && (
+                  <div className="bg-white rounded-2xl border border-border overflow-hidden">
+                    <div className="px-6 py-4 border-b border-border flex items-center gap-3">
+                      <div className="w-9 h-9 rounded-xl bg-accent flex items-center justify-center">
+                        <Icon name="FileText" size={18} className="text-primary" />
+                      </div>
+                      <h3 className="text-lg font-semibold text-foreground">Начисления — Электроэнергия</h3>
+                    </div>
+                    <div className="divide-y divide-border">
+                      {CHARGES_ELECTRICITY.map((c) => (
+                        <div key={c.id} className="px-6 py-4 flex items-center justify-between gap-4">
+                          <div>
+                            <p className="font-medium text-foreground text-base">{c.period}</p>
+                            <p className="text-muted-foreground text-sm">Срок оплаты: {c.dueDate}</p>
+                          </div>
+                          <div className="flex items-center gap-3 flex-shrink-0">
+                            <span className="font-semibold text-foreground text-lg">{c.amount}</span>
+                            <span className={`text-sm font-medium px-3 py-1 rounded-lg border ${statusLabel[c.status].color}`}>
+                              {statusLabel[c.status].label}
+                            </span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {electricitySubTab === "payments" && (
+                  <div className="bg-white rounded-2xl border border-border overflow-hidden">
+                    <div className="px-6 py-4 border-b border-border flex items-center gap-3">
+                      <div className="w-9 h-9 rounded-xl bg-accent flex items-center justify-center">
+                        <Icon name="CreditCard" size={18} className="text-primary" />
+                      </div>
+                      <h3 className="text-lg font-semibold text-foreground">Оплаты — Электроэнергия</h3>
+                    </div>
+                    <div className="divide-y divide-border">
+                      {PAYMENTS_ELECTRICITY.map((p) => (
+                        <div key={p.id} className="px-6 py-4 flex items-center justify-between gap-4">
+                          <div>
+                            <p className="font-medium text-foreground text-base">{p.title}</p>
+                            <p className="text-muted-foreground text-sm">{p.date}</p>
+                          </div>
+                          <div className="flex items-center gap-3 flex-shrink-0">
+                            <span className="font-semibold text-foreground text-lg">{p.amount}</span>
+                            <span className={`text-sm font-medium px-3 py-1 rounded-lg border ${statusLabel[p.status].color}`}>
+                              {statusLabel[p.status].label}
+                            </span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {electricitySubTab === "balance" && (
+                  <div className="bg-white rounded-2xl border border-border p-8">
+                    <div className="grid sm:grid-cols-2 gap-4 mb-8">
+                      <div className="bg-secondary rounded-xl p-5">
+                        <p className="text-muted-foreground text-sm mb-1">Всего начислено</p>
+                        <p className="text-2xl font-bold text-foreground">{totalCharged.toLocaleString("ru-RU")} ₽</p>
+                      </div>
+                      <div className="bg-secondary rounded-xl p-5">
+                        <p className="text-muted-foreground text-sm mb-1">Всего оплачено</p>
+                        <p className="text-2xl font-bold text-foreground">{totalPaid.toLocaleString("ru-RU")} ₽</p>
+                      </div>
+                    </div>
+                    <div className={`rounded-2xl border p-8 flex items-center gap-6 ${diff < 0 ? "bg-red-50 border-red-200" : "bg-green-50 border-green-200"}`}>
+                      <div className={`w-16 h-16 rounded-2xl flex items-center justify-center flex-shrink-0 ${diff < 0 ? "bg-red-100" : "bg-green-100"}`}>
+                        <Icon name={diff < 0 ? "AlertCircle" : "CheckCircle"} size={28} className={diff < 0 ? "text-red-600" : "text-green-600"} />
+                      </div>
+                      <div>
+                        <p className={`text-lg font-semibold mb-1 ${diff < 0 ? "text-red-700" : "text-green-700"}`}>
+                          {diff < 0 ? "Долг" : "Переплата"}
+                        </p>
+                        <p className={`text-4xl font-bold ${diff < 0 ? "text-red-600" : "text-green-600"}`}>
+                          {Math.abs(diff).toLocaleString("ru-RU")} ₽
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
-              {electricitySubTab === "charges" && (
-                <div className="bg-white rounded-2xl border border-border overflow-hidden">
-                  <div className="px-6 py-4 border-b border-border flex items-center gap-3">
-                    <div className="w-9 h-9 rounded-xl bg-accent flex items-center justify-center">
-                      <Icon name="FileText" size={18} className="text-primary" />
-                    </div>
-                    <h3 className="text-lg font-semibold text-foreground">Начисления — Электроэнергия</h3>
-                  </div>
-                  <div className="divide-y divide-border">
-                    {CHARGES_ELECTRICITY.map((c) => (
-                      <div key={c.id} className="px-6 py-4 flex items-center justify-between gap-4">
-                        <div>
-                          <p className="font-medium text-foreground text-base">{c.period}</p>
-                          <p className="text-muted-foreground text-sm">Срок оплаты: {c.dueDate}</p>
-                        </div>
-                        <div className="flex items-center gap-3 flex-shrink-0">
-                          <span className="font-semibold text-foreground text-lg">{c.amount}</span>
-                          <span className={`text-sm font-medium px-3 py-1 rounded-lg border ${statusLabel[c.status].color}`}>
-                            {statusLabel[c.status].label}
-                          </span>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-              {electricitySubTab === "payments" && (
-                <div className="bg-white rounded-2xl border border-border overflow-hidden">
-                  <div className="px-6 py-4 border-b border-border flex items-center gap-3">
-                    <div className="w-9 h-9 rounded-xl bg-accent flex items-center justify-center">
-                      <Icon name="CreditCard" size={18} className="text-primary" />
-                    </div>
-                    <h3 className="text-lg font-semibold text-foreground">Оплаты — Электроэнергия</h3>
-                  </div>
-                  <div className="divide-y divide-border">
-                    {PAYMENTS_ELECTRICITY.map((p) => (
-                      <div key={p.id} className="px-6 py-4 flex items-center justify-between gap-4">
-                        <div>
-                          <p className="font-medium text-foreground text-base">{p.title}</p>
-                          <p className="text-muted-foreground text-sm">{p.date}</p>
-                        </div>
-                        <div className="flex items-center gap-3 flex-shrink-0">
-                          <span className="font-semibold text-foreground text-lg">{p.amount}</span>
-                          <span className={`text-sm font-medium px-3 py-1 rounded-lg border ${statusLabel[p.status].color}`}>
-                            {statusLabel[p.status].label}
-                          </span>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
-          )}
+            );
+          })()}
 
           {/* NOTIFICATIONS TAB */}
           {activeTab === "notifications" && (
