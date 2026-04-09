@@ -62,8 +62,9 @@ export default function Index() {
   const [notifEmailAddr, setNotifEmailAddr] = useState("ivan@example.com");
   const [notifPhone, setNotifPhone] = useState("+7 (900) 123-45-67");
   const [settingsSaved, setSettingsSaved] = useState(false);
-  const [activeTab, setActiveTab] = useState<"charges" | "payments" | "notifications" | "settings">("charges");
-  const [chargesTab, setChargesTab] = useState<"membership" | "electricity">("membership");
+  const [activeTab, setActiveTab] = useState<"membership" | "electricity" | "notifications" | "settings">("membership");
+  const [membershipSubTab, setMembershipSubTab] = useState<"charges" | "payments">("charges");
+  const [electricitySubTab, setElectricitySubTab] = useState<"charges" | "payments">("charges");
 
   const unreadCount = notifications.filter((n) => !n.read).length;
 
@@ -218,8 +219,8 @@ export default function Index() {
           <div className="flex gap-2 mb-6 bg-secondary rounded-xl p-1">
             {(
               [
-                { key: "charges", label: "Начисления", icon: "FileText" },
-                { key: "payments", label: "Платежи", icon: "CreditCard" },
+                { key: "membership", label: "Членские взносы", icon: "Users" },
+                { key: "electricity", label: "Электроэнергия", icon: "Zap" },
                 { key: "notifications", label: "Уведомления", icon: "Bell" },
                 { key: "settings", label: "Настройки", icon: "Settings" },
               ] as { key: typeof activeTab; label: string; icon: string }[]
@@ -244,112 +245,163 @@ export default function Index() {
             ))}
           </div>
 
-          {/* CHARGES TAB */}
-          {activeTab === "charges" && (
+          {/* MEMBERSHIP TAB */}
+          {activeTab === "membership" && (
             <div className="animate-slide-up">
               <div className="flex gap-2 mb-5 bg-secondary rounded-xl p-1 w-fit">
                 <button
-                  onClick={() => setChargesTab("membership")}
+                  onClick={() => setMembershipSubTab("charges")}
                   className={`px-5 py-2 rounded-lg text-base font-medium transition-colors ${
-                    chargesTab === "membership"
+                    membershipSubTab === "charges"
                       ? "bg-white text-foreground shadow-sm"
                       : "text-muted-foreground hover:text-foreground"
                   }`}
                 >
-                  Членские взносы
+                  Начисления
                 </button>
                 <button
-                  onClick={() => setChargesTab("electricity")}
+                  onClick={() => setMembershipSubTab("payments")}
                   className={`px-5 py-2 rounded-lg text-base font-medium transition-colors ${
-                    chargesTab === "electricity"
+                    membershipSubTab === "payments"
                       ? "bg-white text-foreground shadow-sm"
                       : "text-muted-foreground hover:text-foreground"
                   }`}
                 >
-                  Электроэнергия
+                  Оплаты
                 </button>
               </div>
-              {(() => {
-                const charges = chargesTab === "membership" ? CHARGES_MEMBERSHIP : CHARGES_ELECTRICITY;
-                const icon = chargesTab === "membership" ? "Users" : "Zap";
-                return (
-                  <div className="bg-white rounded-2xl border border-border overflow-hidden">
-                    <div className="px-6 py-4 border-b border-border flex items-center gap-3">
-                      <div className="w-9 h-9 rounded-xl bg-accent flex items-center justify-center">
-                        <Icon name={icon} size={18} className="text-primary" />
-                      </div>
-                      <h3 className="text-lg font-semibold text-foreground">
-                        {chargesTab === "membership" ? "Членские взносы" : "Электроэнергия"}
-                      </h3>
+              {membershipSubTab === "charges" && (
+                <div className="bg-white rounded-2xl border border-border overflow-hidden">
+                  <div className="px-6 py-4 border-b border-border flex items-center gap-3">
+                    <div className="w-9 h-9 rounded-xl bg-accent flex items-center justify-center">
+                      <Icon name="FileText" size={18} className="text-primary" />
                     </div>
-                    <div className="divide-y divide-border">
-                      {charges.map((c) => (
-                        <div key={c.id} className="px-6 py-4 flex items-center justify-between gap-4">
-                          <div>
-                            <p className="font-medium text-foreground text-base">{c.period}</p>
-                            <p className="text-muted-foreground text-sm">Срок оплаты: {c.dueDate}</p>
-                          </div>
-                          <div className="flex items-center gap-3 flex-shrink-0">
-                            <span className="font-semibold text-foreground text-lg">{c.amount}</span>
-                            <span className={`text-sm font-medium px-3 py-1 rounded-lg border ${statusLabel[c.status].color}`}>
-                              {statusLabel[c.status].label}
-                            </span>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
+                    <h3 className="text-lg font-semibold text-foreground">Начисления — Членские взносы</h3>
                   </div>
-                );
-              })()}
-            </div>
-          )}
-
-          {/* PAYMENTS TAB */}
-          {activeTab === "payments" && (
-            <div className="animate-slide-up">
-              <div className="grid sm:grid-cols-3 gap-4 mb-6">
-                <div className="bg-white rounded-2xl border border-border p-5">
-                  <p className="text-muted-foreground text-sm mb-1">К оплате</p>
-                  <p className="text-3xl font-bold text-amber-600">4 850 ₽</p>
-                </div>
-                <div className="bg-white rounded-2xl border border-border p-5">
-                  <p className="text-muted-foreground text-sm mb-1">Оплачено за апрель</p>
-                  <p className="text-3xl font-bold text-green-600">1 830 ₽</p>
-                </div>
-                <div className="bg-white rounded-2xl border border-border p-5">
-                  <p className="text-muted-foreground text-sm mb-1">Просрочено</p>
-                  <p className="text-3xl font-bold text-destructive">600 ₽</p>
-                </div>
-              </div>
-
-              <div className="bg-white rounded-2xl border border-border overflow-hidden">
-                <div className="px-6 py-4 border-b border-border">
-                  <h3 className="text-lg font-semibold text-foreground">История платежей</h3>
-                </div>
-                <div className="divide-y divide-border">
-                  {PAYMENTS.map((p) => (
-                    <div key={p.id} className="px-6 py-4 flex items-center justify-between gap-4">
-                      <div className="flex items-center gap-4">
-                        <div className="w-10 h-10 rounded-xl bg-accent flex items-center justify-center flex-shrink-0">
-                          <Icon name="Receipt" size={18} className="text-primary" />
+                  <div className="divide-y divide-border">
+                    {CHARGES_MEMBERSHIP.map((c) => (
+                      <div key={c.id} className="px-6 py-4 flex items-center justify-between gap-4">
+                        <div>
+                          <p className="font-medium text-foreground text-base">{c.period}</p>
+                          <p className="text-muted-foreground text-sm">Срок оплаты: {c.dueDate}</p>
                         </div>
+                        <div className="flex items-center gap-3 flex-shrink-0">
+                          <span className="font-semibold text-foreground text-lg">{c.amount}</span>
+                          <span className={`text-sm font-medium px-3 py-1 rounded-lg border ${statusLabel[c.status].color}`}>
+                            {statusLabel[c.status].label}
+                          </span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+              {membershipSubTab === "payments" && (
+                <div className="bg-white rounded-2xl border border-border overflow-hidden">
+                  <div className="px-6 py-4 border-b border-border flex items-center gap-3">
+                    <div className="w-9 h-9 rounded-xl bg-accent flex items-center justify-center">
+                      <Icon name="CreditCard" size={18} className="text-primary" />
+                    </div>
+                    <h3 className="text-lg font-semibold text-foreground">Оплаты — Членские взносы</h3>
+                  </div>
+                  <div className="divide-y divide-border">
+                    {PAYMENTS.filter((p) => p.title === "Членские взносы").map((p) => (
+                      <div key={p.id} className="px-6 py-4 flex items-center justify-between gap-4">
                         <div>
                           <p className="font-medium text-foreground text-base">{p.title}</p>
                           <p className="text-muted-foreground text-sm">{p.date}</p>
                         </div>
+                        <div className="flex items-center gap-3 flex-shrink-0">
+                          <span className="font-semibold text-foreground text-lg">{p.amount}</span>
+                          <span className={`text-sm font-medium px-3 py-1 rounded-lg border ${statusLabel[p.status].color}`}>
+                            {statusLabel[p.status].label}
+                          </span>
+                        </div>
                       </div>
-                      <div className="flex items-center gap-3 flex-shrink-0">
-                        <span className="font-semibold text-foreground text-lg">{p.amount}</span>
-                        <span
-                          className={`text-sm font-medium px-3 py-1 rounded-lg border ${statusLabel[p.status].color}`}
-                        >
-                          {statusLabel[p.status].label}
-                        </span>
-                      </div>
-                    </div>
-                  ))}
+                    ))}
+                  </div>
                 </div>
+              )}
+            </div>
+          )}
+
+          {/* ELECTRICITY TAB */}
+          {activeTab === "electricity" && (
+            <div className="animate-slide-up">
+              <div className="flex gap-2 mb-5 bg-secondary rounded-xl p-1 w-fit">
+                <button
+                  onClick={() => setElectricitySubTab("charges")}
+                  className={`px-5 py-2 rounded-lg text-base font-medium transition-colors ${
+                    electricitySubTab === "charges"
+                      ? "bg-white text-foreground shadow-sm"
+                      : "text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  Начисления
+                </button>
+                <button
+                  onClick={() => setElectricitySubTab("payments")}
+                  className={`px-5 py-2 rounded-lg text-base font-medium transition-colors ${
+                    electricitySubTab === "payments"
+                      ? "bg-white text-foreground shadow-sm"
+                      : "text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  Оплаты
+                </button>
               </div>
+              {electricitySubTab === "charges" && (
+                <div className="bg-white rounded-2xl border border-border overflow-hidden">
+                  <div className="px-6 py-4 border-b border-border flex items-center gap-3">
+                    <div className="w-9 h-9 rounded-xl bg-accent flex items-center justify-center">
+                      <Icon name="FileText" size={18} className="text-primary" />
+                    </div>
+                    <h3 className="text-lg font-semibold text-foreground">Начисления — Электроэнергия</h3>
+                  </div>
+                  <div className="divide-y divide-border">
+                    {CHARGES_ELECTRICITY.map((c) => (
+                      <div key={c.id} className="px-6 py-4 flex items-center justify-between gap-4">
+                        <div>
+                          <p className="font-medium text-foreground text-base">{c.period}</p>
+                          <p className="text-muted-foreground text-sm">Срок оплаты: {c.dueDate}</p>
+                        </div>
+                        <div className="flex items-center gap-3 flex-shrink-0">
+                          <span className="font-semibold text-foreground text-lg">{c.amount}</span>
+                          <span className={`text-sm font-medium px-3 py-1 rounded-lg border ${statusLabel[c.status].color}`}>
+                            {statusLabel[c.status].label}
+                          </span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+              {electricitySubTab === "payments" && (
+                <div className="bg-white rounded-2xl border border-border overflow-hidden">
+                  <div className="px-6 py-4 border-b border-border flex items-center gap-3">
+                    <div className="w-9 h-9 rounded-xl bg-accent flex items-center justify-center">
+                      <Icon name="CreditCard" size={18} className="text-primary" />
+                    </div>
+                    <h3 className="text-lg font-semibold text-foreground">Оплаты — Электроэнергия</h3>
+                  </div>
+                  <div className="divide-y divide-border">
+                    {PAYMENTS.filter((p) => p.title === "Электроэнергия").map((p) => (
+                      <div key={p.id} className="px-6 py-4 flex items-center justify-between gap-4">
+                        <div>
+                          <p className="font-medium text-foreground text-base">{p.title}</p>
+                          <p className="text-muted-foreground text-sm">{p.date}</p>
+                        </div>
+                        <div className="flex items-center gap-3 flex-shrink-0">
+                          <span className="font-semibold text-foreground text-lg">{p.amount}</span>
+                          <span className={`text-sm font-medium px-3 py-1 rounded-lg border ${statusLabel[p.status].color}`}>
+                            {statusLabel[p.status].label}
+                          </span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           )}
 
